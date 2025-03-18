@@ -1,6 +1,6 @@
 # SignalAccumulativeMLP
 
-Welcome to the SignalAccumulativeMLP project! This repository contains a custom neural network model leveraging signal accumulation for preprocessing, designed for learning from sequential or streaming data. Below is an in-depth overview, setup guide, and usage instructions. This file is intended to be both presentable and easy to follow—perfect for showcasing in your portfolio.
+Welcome to the Signal Accumulative Model project, This repository contains a custom neural network model leveraging signal accumulation for preprocessing, designed for learning from sequential or streaming data. Below is an in-depth overview, setup guide, and usage instructions. This file is intended to be both presentable and easy to follow—perfect for showcasing in your portfolio.
 
 ---
 
