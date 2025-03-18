@@ -3,10 +3,15 @@ import torch.nn as nn
 import torch.optim as optim
 from stream_handler import StreamManager
 from signal_accumulative_mlp import SignalAccumulativeMLP
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-def train(model, criterion, optimizer, t_loader, v_loader, n_epochs=10,):
+def train(model, criterion, optimizer, t_loader, v_loader, n_epochs=10, save_path="models/signal_accumulative_model"):
     for epoch in range(n_epochs):
+        model.reset_accumulators()
         model.train()
         train_loss = 0.0
         correct = 0
@@ -53,9 +58,12 @@ def train(model, criterion, optimizer, t_loader, v_loader, n_epochs=10,):
         val_loss = val_loss / len(v_loader.dataset)
         val_acc = correct / total
 
-        print(f'Epoch {epoch + 1}/{n_epochs}: '
-              f'Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, '
-              f'Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}')
+        logger.info(f'Epoch {epoch + 1}/{n_epochs}: '
+                    f'Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, '
+                    f'Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}')
+
+        if save_path:
+            model.save_model(f"{save_path}_epoch_{epoch + 1}.pt")
 
     return model
 
@@ -72,6 +80,7 @@ def main():
     accumulator_decay = 0.9
     learning_rate = 0.001
     num_epochs = 10
+    save_path = "models/signal_accumulative_model"
 
     # Data Loading
     # Training
@@ -95,7 +104,13 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
-    model = train(model, criterion, optimizer, train_loader, validation_loader, n_epochs=num_epochs)
+    model = train(model,
+                  criterion,
+                  optimizer,
+                  train_loader,
+                  validation_loader,
+                  n_epochs=num_epochs,
+                  save_path=save_path)
 
 if __name__ == '__main__':
     main()
