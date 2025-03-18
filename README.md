@@ -24,7 +24,7 @@ Welcome to the Signal Accumulative Model project, This repository contains a cus
 
 ## Introduction
 
-Typical neural network architectures rely on either feed-forward layers or recurrent layers for handling sequential data. The SignalAccumulativeMLP introduces a different approach by storing state in a learnable accumulator. This can be useful when prior context is essential but you do not want the added complexity of standard recurrent or Transformer-based models.
+Typical neural network architectures rely on either feed-forward layers or recurrent layers for handling sequential data. The SignalAccumulativeMLP introduces a different approach by storing state in a accumulator. This can be useful when prior context is essential but you do not want the added complexity of standard recurrent or Transformer-based models.
 
 Key points to note:
 - Designed for streaming or sequential data.
