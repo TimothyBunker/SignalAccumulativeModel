@@ -47,9 +47,11 @@ Key points to note:
 
 ```mermaid
 flowchart LR
-    A[Input Tensor] --> B[Accumulators<br>(Decay Over Time)]
+    A[Input Tensor] --> B[Accumulators]
     B --> C[Feed-Forward Layers]
     C --> D[Output Classification]
+    
+    style B fill:#f9f,stroke:#333,stroke-width:2px
 ```
 
 1. **Input Layer**: Accepts token-like or feature vectors of size equal to your `vocab_size`.
@@ -252,4 +254,4 @@ signal-accumulative-mlp/
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). Feel free to modify and distribute under these terms.
+This project is licensed under the [Apache 2.0 License](LICENSE). Feel free to modify and distribute under these terms.
