@@ -1,7 +1,8 @@
 from data_handler import DataAggregator
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, TensorDataset
+
 
 class StreamManager:
     def __init__(self, word_list=None, seed=42):
