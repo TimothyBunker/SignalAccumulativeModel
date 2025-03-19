@@ -1,4 +1,3 @@
-from nltk.corpus import words
 import numpy as np
 
 
@@ -140,9 +139,3 @@ class DataAggregator:
         for i in range(len(char_data)):
             one_hot_data.append(self.convert_to_one_hot(char_data[i]))
         return one_hot_data
-
-
-words = words.words()
-data_aggregator = DataAggregator(words)
-dataset = data_aggregator.get_data()
-print(len(dataset))
