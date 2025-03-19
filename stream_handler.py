@@ -1,6 +1,7 @@
 from data_handler import DataAggregator
 import numpy as np
-
+import torch
+from torch import TensorDataset, DataLoader
 
 class StreamManager:
     def __init__(self, word_list=None, seed=42):
@@ -14,7 +15,7 @@ class StreamManager:
         self.data = self.data_aggregator.get_data()
 
         self.vocab = "abcdefghijklmnopqrstuvwxyz"
-        self.vocab_size = len(self.vocab)
+        self._vocab_size = len(self.vocab)
 
         (self.word_inputs,
          self.word_targets,
@@ -28,12 +29,18 @@ class StreamManager:
         self.input_streams = []
         self.target_streams = []
 
+    def set_seed(self, num):
+        self.seed = num
+
+    def get_vocab_size(self):
+        return self._vocab_size
+
     def separate_data(self):
         word_inputs = []
         word_targets = []
         shuffled_word_inputs = []
         shuffled_word_targets = []
-        blank_input = [[0.0] * self.vocab_size]
+        blank_input = [[0.0] * self._vocab_size]
         blank_target = [0]
 
         for word in self.data[0]:
@@ -108,7 +115,7 @@ class StreamManager:
 
         return s_inputs, s_targets
 
-    def generate_batches(self, num_streams, sequence_length=20, as_numpy=True):
+    def generate_batches(self, num_streams, sequence_length, as_numpy=True):
         s_inputs = []
         s_targets = []
         smallest_stream_length = float('inf')
@@ -142,7 +149,7 @@ class StreamManager:
 
         return batches_X, batches_Y
 
-    def get_torch_batches(self, num_streams, sequence_length=20):
+    def get_torch_batches(self, num_streams, sequence_length):
         batches_X, batches_Y = self.generate_batches(num_streams, sequence_length, as_numpy=True)
 
         # Convert to PyTorch tensors
@@ -150,6 +157,20 @@ class StreamManager:
         torch_batches_Y = [torch.LongTensor(batch) for batch in batches_Y]
 
         return torch_batches_X, torch_batches_Y
+
+    @staticmethod
+    def load_data(num_streams, tensor_batches_x, tensor_batches_y):
+        dataset = TensorDataset(torch.cat(tensor_batches_x), torch.cat(tensor_batches_y))
+        dataloader = DataLoader(dataset, batch_size=num_streams, shuffle=False)
+
+        # Print shapes to verify
+        for batch_idx, (inputs, targets) in enumerate(dataloader):
+            print(f'Batch {batch_idx + 1}')
+            print(f'Inputs shape: {inputs.shape}')
+            print(f'Targets shape: {targets.shape}')
+            break
+
+        return dataloader
 
     @staticmethod
     def flatten_inputs(X):
@@ -171,15 +192,3 @@ class StreamManager:
         flat_targets = np.array(flat_targets, dtype=np.int16)
 
         return flat_targets
-
-if __name__ == '__main__':
-    stream_manager = StreamManager()
-    stream_inputs, stream_targets = stream_manager.generate_stream(sequence_length=500)
-    flattened_inputs = stream_manager.flatten_inputs(stream_inputs)
-    flattened_targets = stream_manager.flatten_targets(stream_targets)
-    x_batches, y_batches = stream_manager.generate_batches(3, sequence_length=20,as_numpy=True)
-
-    print(f'Input Batches:\n {x_batches}')
-    print(f'Target Batches:\n {y_batches}')
-    print(f'Length of Input Batches: {len(x_batches)}')
-    print(f'Length of Target Batches: {len(y_batches)}')
