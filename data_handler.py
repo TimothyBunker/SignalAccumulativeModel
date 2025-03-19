@@ -79,7 +79,7 @@ class DataAggregator:
             elif self.trie.is_valid_prefix(prefix):
                 targets[i-1] = 1
             else:
-                targets[i-1] = 0
+                targets[i-1] = 3
         return targets
 
     def build_trie(self):
@@ -92,21 +92,14 @@ class DataAggregator:
         """
         Add padding to a dataset where each item is a list of (character, target) pairs
         """
-        padded_dataset = []
+        processed_dataset = []
 
         for word_target_pairs in word_set:
             # Separate characters and targets
-            chars, targets = zip(*word_target_pairs)  # Unzip the pairs
+            word_with_separator = list(word_target_pairs) + [(pad_char, pad_target)]
+            processed_dataset.append(word_with_separator)
 
-            # Create padded versions
-            padded_chars = list(chars) + [pad_char] * (self.max_word_size - len(chars))
-            padded_targets = list(targets) + [pad_target] * (self.max_word_size - len(targets))
-
-            # Combine back into pairs
-            padded_pairs = list(zip(padded_chars, padded_targets))
-            padded_dataset.append(padded_pairs)
-
-        return padded_dataset
+        return processed_dataset
 
     def generate_shuffled_words(self):
         shuffled_words = self.word_list.copy()
