@@ -1,7 +1,11 @@
+import time
+
 from data_handler import DataAggregator
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
+import random
+import os
 
 
 class StreamManager:
@@ -31,7 +35,15 @@ class StreamManager:
         self.target_streams = []
 
     def set_seed(self, num):
-        self.seed = num
+        """Set seed with additional entropy to ensure true randomness"""
+
+        # Mix in system randomness for better variety
+        random_component = int.from_bytes(os.urandom(4), byteorder="big") % 10000
+        self.seed = (num * 17 + random_component) % 2 ** 32
+
+        # Reset stream state when seed changes
+        self.input_streams = []
+        self.target_streams = []
 
     def get_vocab_size(self):
         return self._vocab_size
@@ -73,6 +85,17 @@ class StreamManager:
 
         return word_inputs, word_targets, shuffled_word_inputs, shuffled_word_targets, blank_input, blank_target
 
+    def generate_validation_data(self, num_streams, sequence_length):
+        """Generate independent validation data with true randomness"""
+        original_seed = self.seed
+
+        validation_seed = int(time.time() * 1000) % 1000000
+        self.set_seed(validation_seed)
+        x_batches, y_batches = self.get_torch_batches(num_streams, sequence_length)
+        self.seed = original_seed
+
+        return x_batches, y_batches
+
     def generate_stream(self, sequence_length=64, random_state=None):
         """
         :param random_state: a random seed tracked across streams
@@ -89,8 +112,15 @@ class StreamManager:
         else:
             rng = random_state
 
+        pattern_choices = [
+            ('a', 0.5),
+            ('b', 0.45),
+            ('c', 0.05)
+        ]
+        choices, weights = zip(*pattern_choices)
+
         while len(s_inputs) < sequence_length:
-            list_choice = rng.choice(['a', 'b', 'c'])
+            list_choice = rng.choice(choices, p=weights)
             remaining = sequence_length - len(s_inputs)
 
             if list_choice == 'a' and remaining >= 2:
@@ -145,9 +175,6 @@ class StreamManager:
             batches_X = [np.array(batch) for batch in batches_X]
             batches_Y = [np.array(batch) for batch in batches_Y]
 
-        print(f'Stream Inputs [generate_batches]:\n {s_inputs}')
-        print(f'Stream Targets [generate_batches]:\n {s_targets}')
-
         return batches_X, batches_Y
 
     def get_torch_batches(self, num_streams, sequence_length):
@@ -160,16 +187,17 @@ class StreamManager:
         return torch_batches_X, torch_batches_Y
 
     @staticmethod
-    def load_data(num_streams, tensor_batches_x, tensor_batches_y):
+    def load_data(num_streams, tensor_batches_x, tensor_batches_y, render_on=False):
         dataset = TensorDataset(torch.cat(tensor_batches_x), torch.cat(tensor_batches_y))
         dataloader = DataLoader(dataset, batch_size=num_streams, shuffle=False)
 
         # Print shapes to verify
-        for batch_idx, (inputs, targets) in enumerate(dataloader):
-            print(f'Batch {batch_idx + 1}')
-            print(f'Inputs shape: {inputs.shape}')
-            print(f'Targets shape: {targets.shape}')
-            break
+        if render_on:
+            for batch_idx, (inputs, targets) in enumerate(dataloader):
+                print(f'Batch {batch_idx + 1}')
+                print(f'Inputs shape: {inputs.shape}')
+                print(f'Targets shape: {targets.shape}')
+                break
 
         return dataloader
 
@@ -193,3 +221,5 @@ class StreamManager:
         flat_targets = np.array(flat_targets, dtype=np.int16)
 
         return flat_targets
+
+
