@@ -1,6 +1,6 @@
 # SignalAccumulativeMLP
 
-Welcome to the Signal Accumulative Model project, This repository contains a custom neural network model leveraging signal accumulation for preprocessing, designed for learning from sequential or streaming data. Below is an in-depth overview, setup guide, and usage instructions.
+A PyTorch experiment that carries decaying accumulated signals between inputs for sequential or streaming classification.
 
 ---
 
@@ -37,8 +37,8 @@ Key points to note:
 
 - **Custom Accumulator**: Maintains signal values across batches with decay, simulating a memory of recent inputs.
 - **Configurable Architecture**: Easily adjust layer sizes, dropout rate, and more for diverse tasks.
-- **Easy to Extend**: Written in Python using PyTorch, allowing seamless integration with existing pipelines.
-- **Robust Training Flow**: Includes a standard training loop with logging for loss and accuracy.
+- **PyTorch Implementation**: Model and data-generation modules are ordinary Python files.
+- **Training Loop**: Includes a standard training loop with logging for loss and accuracy.
 - **Save/Load Utilities**: Save model weights, configuration, and accumulator states for later use.
 
 ---
@@ -64,13 +64,13 @@ flowchart LR
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/signal-accumulative-mlp.git
-   cd signal-accumulative-mlp
+   git clone https://github.com/TimothyBunker/SignalAccumulativeModel.git
+   cd SignalAccumulativeModel
    ```
 
 2. Install necessary Python dependencies:
    ```bash
-   pip install -r requirements.txt
+   pip install torch numpy scikit-learn
    ```
 
 3. Ensure you have a compatible version of Python (3.8+ recommended) and PyTorch installed.
@@ -79,7 +79,7 @@ flowchart LR
 
 ## Quick Start
 
-Below is a simple workflow demonstrating how to train, validate, and use the SignalAccumulativeMLP model.
+The current training entry point is `signal_train.py`. The example below illustrates the model/data workflow; adjust its arguments and shapes to the current classes before using it in another task.
 
 ### Training
 
@@ -223,25 +223,14 @@ This allows you to cleanly separate data logic from model logic, making the code
 
 ## Directory Structure
 
-Below is a recommended directory layout:
+Current source files:
 
-```
-signal-accumulative-mlp/
-├── README.md
-├── stream_handler.py
-├── signal_accumulative_mlp.py
-├── requirements.txt
-├── main.py
-└── models/
-    └── (saved_models_here)
-```
+- `signal_accumulative_mlp.py`: model and accumulator state.
+- `signal_train.py`: training entry point.
+- `stream_handler.py`: stream generation and batch loading.
+- `data_handler.py`: data aggregation helpers.
 
-- **`signal_accumulative_mlp.py`**: Contains the `SignalAccumulativeMLP` class definition.
-- **`stream_handler.py`**: Contains the `StreamManager` class for data generation/handling.
-- **`main.py`**: Entry point for training and testing the model.
-- **`models/`**: Directory to store saved model checkpoints.
-
----
+Saved model paths are chosen by the calling script; no `requirements.txt` or `main.py` is included.
 
 ## Future Improvements
 
